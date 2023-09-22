@@ -1,26 +1,48 @@
-node('built-in') 
+pipeline
 {
-    stage('contdownload') 
+    agent any
+    stages
     {
-        git 'https://github.com/intelliqittrainings/maven.git'
-    }
-    stage('contbuild') 
-    {
-        sh 'mvn package'
-    }
-    stage('contdeploy') 
-    {
-        sh 'scp /var/lib/jenkins/workspace/scriptedpipeline-1/webapp/target/webapp.war ubuntu@172.31.10.248:/var/lib/tomcat9/webapps/testapp.war'
-    }
-    stage('conttest') 
-    {
-        git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
-        sh 'java -jar /var/lib/jenkins/workspace/scriptedpipeline-1/testing.jar'
-    }
-    stage('contdeploy') 
-    {
-        sh 'scp /var/lib/jenkins/workspace/scriptedpipeline-1/webapp/target/webapp.war ubuntu@172.31.14.94:/var/lib/tomcat9/webapps/prodapp.war'
-    }
+        stage('contdown')
+        {
+            steps
+            {
+                git 'https://github.com/renukat1805/mymaven11.git'
+            }
     
+        }
+        stage('contbuild')
+        {
+            steps
+            {
+                sh 'mvn package'
+            }
+    
+        }
+        stage('contdeploy')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: '18204f8f-fabd-444a-9b73-d296ce198436', path: '', url: 'http://172.31.32.108:8080')], contextPath: 'test1', war: '**/*.war'
+            }
+    
+        }
+        stage('conttest')
+        {
+            steps
+            {
+                git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+                sh 'java -jar /var/lib/jenkins/workspace/Declarativepipeline/testing.jar'
+            }
+    
+        }
+        stage('contdelivery')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: '18204f8f-fabd-444a-9b73-d296ce198436', path: '', url: 'http://172.31.47.238:8080')], contextPath: 'prod1', war: '**/*.war'
+            }
+    
+        }
+    }
 }
-
